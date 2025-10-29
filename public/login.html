@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>로그인</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1b1c2e;
+      --accent: #3ddad7;
+      --background: #121212;
+      --text: #e0e0e0;
+      --card-bg: rgba(30, 30, 30, 0.35);
+      --shadow: rgba(0, 0, 0, 0.7);
+      --neon: #00ffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--background);
+      color: var(--text);
+      font-family: 'Open Sans', sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .login-box {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 20px var(--shadow);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s ease;
+    }
+
+    .login-box.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .login-box h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      color: white;
+      margin-bottom: 30px;
+      text-shadow: 0 0 6px var(--neon);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .input-wrapper,
+    .password-wrapper {
+      display: flex;
+      align-items: center;
+      background: linear-gradient(135deg, #1e1e2f, #2a3c5b);
+      border-radius: 10px;
+      padding: 2px 10px;
+    }
+
+    .input-wrapper input,
+    .password-wrapper input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 15px;
+      background: transparent;
+      color: white;
+    }
+
+    .toggle-icon {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      filter: invert(100%);
+    }
+
+    .login-box button {
+      width: 100%;
+      background: linear-gradient(135deg, #243b55, #2a475e);
+      color: white;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .login-box button:hover {
+      box-shadow: 0 0 12px var(--neon);
+    }
+
+    .login-box a {
+      display: block;
+      margin-top: 20px;
+      color: var(--accent);
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .login-box a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box" id="loginBox">
+    <h2>로그인</h2>
+
+    <div class="form-group input-wrapper">
+      <input type="text" id="user-id" placeholder="ID">
+    </div>
+
+    <div class="form-group password-wrapper">
+      <input type="password" id="login-password" placeholder="비밀번호">
+      <img src="/eye-slash-solid.svg" alt="비밀번호 보기" class="toggle-icon" id="togglePassword" onclick="togglePassword()">
+    </div>
+
+    <button onclick="login()">로그인</button>
+    <a href="register.html">계정이 없으신가요? 회원가입</a>
+  </div>
+
+  <script>
+    let isVisible = false;
+
+    function togglePassword() {
+      const pwdInput = document.getElementById('login-password');
+      const icon = document.getElementById('togglePassword');
+
+      isVisible = !isVisible;
+      pwdInput.type = isVisible ? 'text' : 'password';
+      icon.src = isVisible ? '/eye-solid.svg' : '/eye-slash-solid.svg';
+    }
+
+    async function login() {
+      const id = document.getElementById('user-id').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, password })
+        });
+
+        const data = await res.json();
+
+        if (res.status === 200) {
+          localStorage.setItem('jwt', data.token);  // ✅ 토큰 저장 (jwt)
+          localStorage.setItem('token', data.token); // ✅ 전체 앱에서 통일성 위해 유지
+
+          const params = new URLSearchParams(window.location.search);
+          const redirect = params.get('redirect');
+
+          alert("✅ 로그인 성공!");
+          location.href = redirect || "main.html";
+        } else {
+          alert("❌ 로그인 실패: " + data.message);
+        }
+      } catch (err) {
+        alert("❌ 서버 오류: " + err.message);
+      }
+    }
+
+    window.onload = () => {
+      setTimeout(() => document.getElementById('loginBox').classList.add('show'), 100);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>SafeLast 이용 방법</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1b1c2e;
+      --accent: #3ddad7;
+      --background: #121212;
+      --text: #e0e0e0;
+      --card-bg: rgba(30, 30, 30, 0.35);
+      --shadow: rgba(0, 0, 0, 0.7);
+      --neon: #00ffff;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--background);
+      font-family: 'Open Sans', sans-serif;
+      color: var(--text);
+      padding-top: 100px;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 95%;
+      margin: 0 auto;
+      border-radius: 0 0 20px 20px;
+      background: linear-gradient(to bottom right, #1c1c1c, #2e3a59);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 12px var(--shadow);
+      z-index: 999;
+    }
+
+    .navbar a {
+      color: white;
+      margin-left: 25px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .navbar a:hover {
+      color: var(--accent);
+      text-shadow: 0 0 6px var(--neon);
+    }
+
+    .logo {
+      font-size: 1.3em;
+      font-weight: bold;
+      font-family: 'Playfair Display', serif;
+      color: #c0ffff;
+      text-shadow: 0 0 4px var(--neon);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 32px;
+      color: white;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .accordion {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      color: white;
+      cursor: pointer;
+      padding: 20px;
+      width: 100%;
+      text-align: left;
+      border: none;
+      outline: none;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      transition: background 0.3s;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.05);
+    }
+
+    .accordion:hover,
+    .accordion.active {
+      background-color: rgba(50, 60, 80, 0.6);
+      box-shadow: 0 0 10px var(--neon);
+    }
+
+    .panel {
+      padding: 20px;
+      background-color: rgba(20, 20, 20, 0.8);
+      display: none;
+      overflow: hidden;
+      border-radius: 0 0 10px 10px;
+      margin-bottom: 20px;
+    }
+
+    .panel p {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .panel img {
+      max-width: 35%;
+      border-radius: 10px;
+      margin-top: 10px;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar" id="navbar"></div>
+
+  <div class="container">
+    <h1>SafeLast 이용 방법</h1>
+
+    <button class="accordion">▼ 1. 회원가입 및 로그인</button>
+    <div class="panel">
+      <p>회원가입 시 아이디, 이메일, 비밀번호를 입력하고 가입을 완료합니다. 로그인은 아이디 기반으로 합니다.</p>
+      <img src="회원가입.png" alt="회원가입 예시">
+    </div>
+
+    <button class="accordion">▼ 2. 유언 작성 및 서명</button>
+    <div class="panel">
+      <p>유언 작성 페이지에서 유언을 작성하고 서명을 입력하세요. 저장 및 암호화 버튼을 통해 보관됩니다.</p>
+      <img src="유언작성.png" alt="유언 작성 예시">
+    </div>
+
+    <button class="accordion">▼ 3. 연락처 등록 및 알람 주기 설정</button>
+    <div class="panel">
+      <p>설정 페이지에서 유언 전달 대상자의 이메일을 등록하고 알람 주기를 설정할 수 있습니다.</p>
+      <img src="연락처 등록.png" alt="연락처 설정 예시">
+    </div>
+
+    <button class="accordion">▼ 4. 생존 확인 실패 시 유언 자동 발송</button>
+    <div class="panel">
+      <p>사용자의 활동이 일정 기간 없을 경우 자동으로 사망으로 간주하고 유언이 등록된 이메일로 전송됩니다.</p>
+      <img src="유언 자동 발송.png" alt="유언 전송 예시">
+    </div>
+  </div>
+
+  <script>
+    const isLoggedIn = !!localStorage.getItem("token");
+    const navbar = document.getElementById("navbar");
+
+    if (isLoggedIn) {
+      navbar.innerHTML = `
+        <div class="logo">SafeLast</div>
+        <div>
+          <a href="main.html">Home</a>
+          <a href="write.html">유언 작성</a>
+          <a href="directory.html">보관함</a>
+          <a href="setting.html">설정</a>
+          <a href="instruction.html">이용 방법</a>
+          <a href="#" onclick="logout()">로그아웃</a>
+        </div>
+      `;
+    } else {
+      navbar.innerHTML = `
+        <div class="logo">SafeLast</div>
+        <div>
+          <a href="login.html">로그인</a>
+        </div>
+      `;
+    }
+
+    function logout() {
+      localStorage.clear();
+      alert("로그아웃 되었습니다.");
+      location.href = "main.html";
+    }
+
+    const accordions = document.querySelectorAll(".accordion");
+    accordions.forEach(btn => {
+      btn.addEventListener("click", () => {
+        btn.classList.toggle("active");
+        const panel = btn.nextElementSibling;
+        panel.style.display = panel.style.display === "block" ? "none" : "block";
+      });
+    });
+  </script>
+</body>
+</html>
