@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>유언 작성</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1b1c2e;
+      --accent: #3ddad7;
+      --background: #121212;
+      --text: #e0e0e0;
+      --card-bg: rgba(30, 30, 30, 0.4);
+      --shadow: rgba(0, 0, 0, 0.6);
+      --neon: #00ffff;
+    }
+
+    body {
+      background-color: var(--background);
+      color: var(--text);
+      font-family: 'Open Sans', sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 95%;
+      margin: 0 auto;
+      overflow: hidden;
+      background: linear-gradient(to bottom right, #1c1c1c, #2e3a59);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px var(--shadow);
+      z-index: 999;
+    }
+
+    .navbar.scrolled {
+      backdrop-filter: blur(12px);
+      background-color: rgba(27, 28, 46, 0.6);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .navbar a {
+      color: white;
+      margin-left: 25px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .navbar a:hover {
+      color: var(--accent);
+      text-shadow: 0 0 4px var(--neon);
+    }
+
+    .logo {
+      font-size: 1.3em;
+      font-weight: bold;
+      font-family: 'Playfair Display', serif;
+      color: #c0ffff;
+      text-shadow: 0 0 4px var(--neon);
+    }
+
+    .write-box {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 6px 20px var(--shadow);
+      padding: 40px;
+      border-radius: 16px;
+      width: 600px;
+      margin-top: 140px;
+    }
+
+    .write-box h2 {
+      font-family: 'Playfair Display', serif;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    textarea, input {
+      width: 100%;
+      padding: 15px;
+      border-radius: 10px;
+      border: none;
+      margin-bottom: 16px;
+      background: linear-gradient(to bottom right, #1c1c1c, #2e3a59);
+      color: var(--text);
+      font-family: 'Playfair Display', serif;
+      font-size: 1em;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-group button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .btn-temp { background-color: #888; color: white; }
+    .btn-save { background-color: var(--accent); color: black; }
+    .btn-sign { background-color: #2b2b2b; color: white; }
+    .btn-edit, .btn-delete { background-color: #444; color: white; }
+    .btn-group button:hover {
+      box-shadow: 0 0 10px var(--neon);
+    }
+
+    .quote {
+      text-align: center;
+      font-style: italic;
+      color: #888;
+      margin-top: 60px;
+      font-size: 0.95em;
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar" id="navbar"></div>
+
+  <div class="write-box fade-in">
+    <h2 id="title">유언 작성</h2>
+    <textarea placeholder="당신의 유언을 입력하세요..."></textarea>
+    <input type="text" placeholder="서명 (Sign)">
+    <div class="btn-group">
+      <button class="btn-save" onclick="saveWill()">저장 및 암호화</button>
+      <button class="btn-sign">서명</button>
+    </div>
+    <div class="btn-group" id="editDeleteGroup" style="display: none;">
+      <button class="btn-edit">수정</button>
+      <button class="btn-delete">삭제</button>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("jwt") || localStorage.getItem("token");
+    const isLoggedIn = !!token;
+    const navbar = document.getElementById("navbar");
+
+    if (isLoggedIn) {
+      navbar.innerHTML = `
+        <div class="logo">SafeLast</div>
+        <div>
+          <a href="main.html">Home</a>
+          <a href="write.html">유언 작성</a>
+          <a href="directory.html">보관함</a>
+          <a href="setting.html">설정</a>
+          <a href="instruction.html">이용 방법</a>
+          <a href="#" onclick="logout()">로그아웃</a>
+        </div>
+      `;
+    } else {
+      navbar.innerHTML = `
+        <div class="logo">SafeLast</div>
+        <div>
+          <a href="login.html">로그인</a>
+        </div>
+      `;
+    }
+
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 10);
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isEdit = urlParams.get("edit") === "true";
+    const willId = urlParams.get("id");
+    let alreadyExists = false;
+
+    if (isEdit && willId) {
+      document.getElementById("title").textContent = "유언 수정";
+      document.getElementById("editDeleteGroup").style.display = "flex";
+
+      fetch(`http://localhost:5000/api/will/${willId}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.querySelector("textarea").value = data.message;
+        document.querySelector("input").value = data.recipients[0] || "";
+      })
+      .catch(err => console.error("불러오기 실패", err));
+    } else {
+      fetch("http://localhost:5000/api/will/check", {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+      .then(res => {
+        if (res.status === 409) {
+          alreadyExists = true;
+          document.querySelector("textarea").disabled = true;
+          document.querySelector("input").disabled = true;
+          document.querySelector(".btn-save").disabled = true;
+          alert("⚠️ 이미 유언이 존재합니다.\n수정 화면으로 이동해주세요.");
+        }
+      })
+      .catch(err => console.error("유언 확인 실패", err));
+    }
+
+    function saveWill() {
+      if (!token) return alert("로그인이 필요합니다.");
+      if (alreadyExists) return alert("⚠️ 이미 유언이 존재합니다. 수정 화면을 이용해주세요.");
+
+      const content = document.querySelector("textarea").value;
+      const sign = document.querySelector("input").value;
+      if (!content || !sign) return alert("내용과 서명을 모두 입력해주세요.");
+
+      const method = isEdit ? "PUT" : "POST";
+      const endpoint = isEdit ? `http://localhost:5000/api/will/${willId}` : "http://localhost:5000/api/will";
+
+      fetch(endpoint, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: content, fileUrl: "", recipients: [sign] })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data) return;
+        alert(isEdit ? "수정 완료!" : "저장 완료!");
+        window.location.href = "directory.html";
+      })
+      .catch(err => alert("저장 중 오류 발생"));
+    }
+
+    async function getUserId() {
+      const res = await fetch("http://localhost:5000/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      return data.userId;
+    }
+
+    document.querySelector(".btn-edit").addEventListener("click", async () => {
+      const userId = await getUserId();
+      window.location.href = `will-edit.html?id=${userId}`;  // ✅ write.html → will-edit.html 로 변경
+    });
+
+    document.querySelector(".btn-delete").addEventListener("click", async () => {
+      if (!confirm("정말 삭제하시겠습니까?")) return;
+      fetch("http://localhost:5000/api/will", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message || "삭제 완료");
+        window.location.href = "directory.html";
+      })
+      .catch(err => alert("삭제 실패"));
+    });
+
+    function logout() {
+      alert("로그아웃 되었습니다.");
+      localStorage.clear();
+      window.location.href = "main.html";
+    }
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

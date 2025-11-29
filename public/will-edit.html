@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>유언 수정</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1b1c2e;
+      --accent: #3ddad7;
+      --background: #121212;
+      --text: #e0e0e0;
+      --card-bg: rgba(30, 30, 30, 0.4);
+      --shadow: rgba(0, 0, 0, 0.7);
+      --neon: #00ffff;
+    }
+
+    body {
+      background: var(--background);
+      font-family: 'Open Sans', sans-serif;
+      color: var(--text);
+      margin: 0;
+      padding-top: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 95%;
+      margin: 0 auto;
+      border-radius: 0 0 20px 20px;
+      background-color: var(--primary);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 12px var(--shadow);
+      z-index: 999;
+    }
+
+    .navbar a {
+      color: white;
+      margin-left: 25px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .navbar a:hover {
+      color: var(--accent);
+      text-shadow: 0 0 6px var(--neon);
+    }
+
+    .logo {
+      font-size: 1.3em;
+      font-weight: bold;
+      font-family: 'Playfair Display', serif;
+      color: #c0ffff;
+      text-shadow: 0 0 4px var(--neon);
+    }
+
+    .edit-box {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 20px var(--shadow);
+      border-radius: 20px;
+      padding: 40px;
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+      animation: fadeInUp 1s ease forwards;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .edit-box.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .edit-box h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      margin-bottom: 30px;
+      color: white;
+    }
+
+    textarea, input {
+      width: 100%;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      background: linear-gradient(to bottom right, #1c1c1c, #2e3a59);
+      color: white;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #243b55, #2a475e);
+      color: white;
+      border: none;
+      transition: box-shadow 0.3s ease;
+    }
+
+    button:hover {
+      box-shadow: 0 0 12px var(--neon);
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar" id="navbar"></div>
+
+  <div class="edit-box" id="editBox">
+    <h2>유언 수정</h2>
+    <textarea id="message" placeholder="수정할 유언 내용을 입력하세요..."></textarea>
+    <input type="text" id="recipient" placeholder="서명 (Sign)">
+    <button onclick="updateWill()">수정 완료</button>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    let userId = urlParams.get("id");
+    const token = localStorage.getItem("jwt");
+    const isLoggedIn = !!token;
+    const navbar = document.getElementById("navbar");
+
+    if (isLoggedIn) {
+      navbar.innerHTML = `
+        <div class="logo">SafeLast</div>
+        <div>
+          <a href="main.html">Home</a>
+          <a href="write.html">유언 작성</a>
+          <a href="directory.html">보관함</a>
+          <a href="setting.html">설정</a>
+          <a href="instruction.html">이용 방법</a>
+          <a href="#" onclick="logout()">로그아웃</a>
+        </div>
+      `;
+    } else {
+      navbar.innerHTML = `
+        <div class="logo">SafeLast</div>
+        <div>
+          <a href="login.html">로그인</a>
+        </div>
+      `;
+    }
+
+    function logout() {
+      localStorage.clear();
+      alert("로그아웃 되었습니다.");
+      location.href = "main.html";
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      const box = document.getElementById('editBox');
+      setTimeout(() => box.classList.add('show'), 100);
+
+      // 🆕 로그인한 본인의 id 가져오기 (id 없으면 /me 요청)
+      if (!userId && token) {
+        try {
+          const res = await fetch("/api/auth/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
+          if (res.ok) {
+            userId = data.userId;
+          } else {
+            throw new Error(data.message);
+          }
+        } catch (err) {
+          console.error("자기 정보 조회 실패:", err);
+        }
+      }
+
+      if (!token || !userId) {
+        alert("인증 오류 또는 유저 정보 누락");
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/will/view/${userId}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById("message").value = data.message;
+          document.getElementById("recipient").value = data.recipients?.[0] || "";
+        } else {
+          alert("유언 불러오기 실패: " + data.message);
+        }
+      } catch (err) {
+        alert("유언 조회 중 오류 발생");
+        console.error(err);
+      }
+    });
+
+    async function updateWill() {
+      const message = document.getElementById("message").value;
+      const recipient = document.getElementById("recipient").value;
+
+      if (!message || !recipient) {
+        alert("내용과 서명을 모두 입력해주세요.");
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:5000/api/will", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            message,
+            fileUrl: "",
+            recipients: [recipient]
+          })
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          alert("✅ 유언이 성공적으로 수정되었습니다.");
+          window.location.href = "directory.html";
+        } else {
+          alert("❌ 수정 실패: " + result.message);
+        }
+      } catch (err) {
+        alert("수정 요청 중 오류 발생");
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

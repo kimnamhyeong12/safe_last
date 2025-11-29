@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeLast</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1b1c2e;
+      --accent: #3ddad7;
+      --background: #121212;
+      --text: #e0e0e0;
+      --card-bg: rgba(30, 30, 30, 0.35);
+      --shadow: rgba(0, 0, 0, 0.6);
+      --neon: #00ffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+      letter-spacing: 0.5px;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 999;
+      background-color: rgba(27,28,46,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px var(--shadow);
+      
+    }
+
+
+    .navbar a {
+      color: white;
+      margin-left: 25px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .navbar a:hover {
+      color: var(--accent);
+      text-shadow: 0 0 5px var(--neon);
+    }
+
+    .hero {
+      background: linear-gradient(to bottom right, #1c1c1c, #2e3a59);
+      padding: 120px 20px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      color: #c0ffff;
+      text-shadow: 0 0 4px #00ffff;
+      font-size: 3.5em;
+      margin-bottom: 10px;
+      text-shadow: 0 0 4px var(--neon);
+      font-weight: bold;
+      font-family: 'Playfair Display', serif;
+
+    }
+
+    .hero p {
+      font-size: 1.2em;
+      opacity: 0.95;
+    }
+
+    .section {
+      padding: 80px 40px;
+      text-align: center;
+    }
+
+    .section h2 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 40px;
+    }
+
+    .feature-box {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 30px;
+      width: 280px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px var(--shadow);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .feature-box.visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .feature-box:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 0 12px var(--neon);
+    }
+
+    .footer {
+      background-color: var(--primary);
+      color: white;
+      text-align: center;
+      padding: 30px;
+      font-size: 0.9em;
+    }
+
+    .cta-button {
+      display: inline-block;
+      margin-top: 20px;
+      background-color: var(--accent);
+      color: black;
+      padding: 12px 28px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      box-shadow: 0 4px 12px var(--shadow);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .cta-button:hover {
+      background-color: #2bc4c2;
+      box-shadow: 0 0 12px var(--neon);
+    }
+
+    .quote {
+      text-align: center;
+      font-style: italic;
+      color: #888;
+      margin-top: 60px;
+      font-size: 0.95em;
+    }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .popup-box {
+      background-color: #1c1c1c;
+      padding: 30px;
+      border-radius: 15px;
+      color: white;
+      width: 350px;
+      max-width: 90%;
+      box-shadow: 0 0 20px rgba(100,149,237);
+      text-align: center;
+    }
+
+    .popup-box h2 {
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .popup-box ul {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .popup-box li strong {
+      color: #ff4d4d;
+    }
+
+    .popup-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.popup-buttons button {
+  width: 140px;
+  padding: 10px;
+  font-weight: bold;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+
+    .popup-buttons button:first-child {
+      background-color: #444;
+      color: white;
+    }
+
+    .popup-buttons button:last-child {
+      background-color: var(--accent);
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar" id="navbar"></div>
+
+  <section class="hero">
+    <h1>SafeLast</h1>
+    <p>"당신의 마지막 인사를 품격 있게 남기는 방법"</p>
+  </section>
+
+  <section class="section">
+    <h2>왜 SafeLast인가?</h2>
+    <p>예기치 못한 순간에도, 당신의 의지를 가장 고요하게 전달합니다.</p>
+  </section>
+
+  <section class="section" style="background-color:#181828">
+    <h2>어떻게 작동하나요?</h2>
+    <div class="features">
+      <div class="feature-box"><h3>1. 유언 작성</h3><p>간편한 양식을 통해 텍스트 유언을 작성하고 서명할 수 있습니다.</p></div>
+      <div class="feature-box"><h3>2. 암호화 저장</h3><p>작성된 유언은 안전하게 암호화되어 서버에 저장됩니다.</p></div>
+      <div class="feature-box"><h3>3. 사망 판단</h3><p>사용자의 활동 상태를 자동 감지하여 상황을 판단합니다.</p></div>
+      <div class="feature-box"><h3>4. 자동 발송</h3><p>지정된 연락처로 유언장을 자동 발송하여 전달합니다.</p></div>
+    </div>
+  </section>
+
+  <section class="section" id="bottom-section"></section>
+
+  <div class="quote">“우리는 떠나지만, 말은 남습니다.”</div>
+  <div class="footer">Copyright © 2025 SafeLast. All rights reserved.</div>
+  
+
+  <div id="suicide-popup" class="popup-overlay">
+    <div class="popup-box">
+      <h2>자살 예방 상담 안내</h2>
+      <ul>
+        <li>24시간 전화 상담</li>
+        <li>자살예방상담: <strong>109</strong></li>
+        <li>청소년상담: <strong>1388</strong></li>
+        <li>정신건강상담전화: <strong>1577-0199</strong></li>
+        <li>한국생명의전화: <strong>1588-9191</strong></li>
+      </ul>
+      <div class="popup-buttons">
+        <button onclick="closePopup()">닫기</button>
+        <button onclick="closeToday()">오늘 하루 보지 않기</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const isLoggedIn = !!localStorage.getItem("jwt");
+    const navbar = document.getElementById("navbar");
+    const bottomSection = document.getElementById("bottom-section");
+
+    if (isLoggedIn) {
+      navbar.innerHTML = `
+        <div style="font-size: 1.3em; font-weight: bold; color: white;">SafeLast</div>
+        <div>
+          <a href="main.html">Home</a>
+          <a href="write.html">유언 작성</a>
+          <a href="directory.html">보관함</a>
+          <a href="setting.html">설정</a>
+          <a href="instruction.html">이용 방법</a>
+          <a href="#" onclick="logout()">로그아웃</a>
+        </div>
+      `;
+      bottomSection.innerHTML = `
+        <h2>지금 당신의 유언을 준비하세요</h2>
+        <p>유언 작성 페이지로 바로 이동할 수 있습니다.</p>
+        <a href="write.html" class="cta-button">유언 작성하기</a>
+      `;
+    } else {
+      navbar.innerHTML = `
+        <div style="font-size: 1.3em; font-weight: bold; color: white;">SafeLast</div>
+        <div>
+          <a href="login.html">로그인</a>
+        </div>
+      `;
+      bottomSection.innerHTML = `
+        <h2>지금 시작해보세요</h2>
+        <p>소중한 이들을 위한 마지막 메시지를 준비하세요.</p>
+        <a href="login.html" class="cta-button">로그인 하러 가기</a>
+      `;
+    }
+
+    function logout() {
+      alert("로그아웃 되었습니다.");
+      localStorage.clear();
+      location.href = "main.html";
+    }
+
+    function getTodayStr() {
+      const today = new Date();
+      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    }
+
+    function closePopup() {
+      document.getElementById("suicide-popup").style.display = "none";
+    }
+
+    function closeToday() {
+      localStorage.setItem("hideSuicidePopupDate", getTodayStr());
+      closePopup();
+    }
+
+    function shouldShowPopup() {
+      return localStorage.getItem("hideSuicidePopupDate") !== getTodayStr();
+    }
+
+    window.onload = () => {
+      if (shouldShowPopup()) {
+        document.getElementById("suicide-popup").style.display = "flex";
+      }
+
+      document.querySelectorAll('.feature-box').forEach(box => {
+        const rect = box.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 50) {
+          box.classList.add('visible');
+        }
+      });
+
+      window.addEventListener('scroll', () => {
+        document.querySelectorAll('.feature-box').forEach(box => {
+          const rect = box.getBoundingClientRect();
+          if (rect.top < window.innerHeight - 50) {
+            box.classList.add('visible');
+          }
+        });
+      });
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>유언 보관함</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1b1c2e;
+      --accent: #3ddad7;
+      --background: #121212;
+      --text: #e0e0e0;
+      --card-bg: rgba(30, 30, 30, 0.35);
+      --shadow: rgba(0, 0, 0, 0.7);
+      --neon: #00ffff;
+    }
+
+    body {
+      background: var(--background);
+      color: var(--text);
+      font-family: 'Open Sans', sans-serif;
+      margin: 0;
+      padding-top: 100px;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 95%;
+      margin: 0 auto;
+      border-radius: 0 0 20px 20px;
+      overflow: hidden;
+      background: linear-gradient(to bottom right, #1c1c1c, #2e3a59);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 12px var(--shadow);
+      z-index: 999;
+    }
+
+    .navbar a {
+      color: white;
+      margin-left: 25px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .navbar a:hover {
+      color: var(--accent);
+      text-shadow: 0 0 6px var(--neon);
+    }
+
+    .navbar .logo {
+      font-size: 1.3em;
+      font-weight: bold;
+      font-family: 'Playfair Display', serif;
+      color: #c0ffff;
+      text-shadow: 0 0 4px var(--neon);
+    }
+
+    .dir-box {
+      margin: 0 auto;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 10px 30px var(--shadow);
+      padding: 40px;
+      border-radius: 16px;
+      width: 500px;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .dir-box h2 {
+      font-family: 'Playfair Display', serif;
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 1.5em;
+    }
+
+    .dir-box input {
+      width: 100%;
+      padding: 15px;
+      border-radius: 10px;
+      border: none;
+      margin-bottom: 16px;
+      background-color: #1e1e2f;
+      color: var(--text);
+      font-size: 1em;
+      background: linear-gradient(135deg, #1e1e2f, #2a3c5b);
+      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-group button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      background-color: var(--accent);
+      color: black;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .btn-group button:hover {
+      box-shadow: 0 0 10px var(--neon);
+    }
+
+    button[disabled] {
+      background-color: #2a2a2a;
+      color: #777;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .result {
+      background: linear-gradient(to bottom right, #1c1c1c, #2e3a59);
+      padding: 15px;
+      border-radius: 10px;
+      white-space: pre-line;
+      margin-top: 20px;
+      color: var(--text);
+      line-height: 1.6;
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body onload="revealOnScroll()">
+  <div class="navbar" id="navbar"></div>
+
+  <div class="dir-box fade-in">
+    <h2>유언 열람</h2>
+    <input type="password" id="password" placeholder="로그인 시 사용한 비밀번호 입력" />
+    <div class="btn-group">
+      <button onclick="verifyPasswordAndLoad()">열람</button>
+      <button id="editBtn" onclick="editWill()" disabled>수정</button>
+      <button id="deleteBtn" onclick="deleteWill()" disabled>삭제</button>
+    </div>
+    <div id="result" class="result" style="display:none;"></div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("jwt");
+    const isLoggedIn = !!token;
+    const navbar = document.getElementById("navbar");
+
+    if (isLoggedIn) {
+      navbar.innerHTML = `
+        <div class="logo">SafeLast</div>
+        <div>
+          <a href="main.html">Home</a>
+          <a href="write.html">유언 작성</a>
+          <a href="directory.html">보관함</a>
+          <a href="setting.html">설정</a>
+          <a href="instruction.html">이용 방법</a>
+          <a href="#" onclick="logout()">로그아웃</a>
+        </div>
+      `;
+    } else {
+      navbar.innerHTML = `
+        <div class="logo">SafeLast</div>
+        <div>
+          <a href="login.html">로그인</a>
+        </div>
+      `;
+    }
+
+    function parseJwt(token) {
+      try {
+        const base64Payload = token.split('.')[1];
+        return JSON.parse(atob(base64Payload));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    let currentUserId = "";
+
+    async function verifyPasswordAndLoad() {
+      if (!token) return alert("로그인이 필요합니다.");
+      const password = document.getElementById("password").value;
+      if (!password) return alert("비밀번호를 입력해주세요.");
+
+      try {
+        const verifyRes = await fetch("http://localhost:5000/api/verify-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ password })
+        });
+
+        const verifyData = await verifyRes.json();
+        if (!verifyData.success) return alert("비밀번호가 일치하지 않습니다.");
+
+        const decoded = parseJwt(token);
+        if (!decoded || !decoded.userId) return alert("유저 정보를 확인할 수 없습니다.");
+
+        currentUserId = decoded.userId;
+
+        const willRes = await fetch(`http://localhost:5000/api/will/view/${decoded.userId}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        const willData = await willRes.json();
+        const resultDiv = document.getElementById("result");
+
+        if (willRes.ok) {
+          resultDiv.style.display = "block";
+          resultDiv.innerText = `📜 유언:\n${willData.message}\n\n🕒 작성일: ${new Date(willData.createdAt).toLocaleString()}`;
+          document.getElementById("editBtn").disabled = false;
+          document.getElementById("deleteBtn").disabled = false;
+        } else {
+          resultDiv.style.display = "block";
+          resultDiv.innerText = `❌ 유언 조회 실패: ${willData.message}`;
+        }
+      } catch (err) {
+        console.error(err);
+        alert("유언 조회 중 오류 발생");
+      }
+    }
+
+    function editWill() {
+      if (!currentUserId) return alert("유저 정보가 없습니다.");
+      window.location.href =  `will-edit.html?id=${currentUserId}`;
+    }
+
+    async function deleteWill() {
+      if (!confirm("정말로 유언을 삭제하시겠습니까?")) return;
+
+      try {
+        const res = await fetch("http://localhost:5000/api/will", {
+          method: "DELETE",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        const data = await res.json();
+        alert(data.message || "삭제 완료되었습니다.");
+        window.location.reload();
+      } catch (err) {
+        console.error(err);
+        alert("삭제 중 오류가 발생했습니다.");
+      }
+    }
+
+    function logout() {
+      alert("로그아웃 되었습니다.");
+      localStorage.clear();
+      window.location.href = "main.html";
+    }
+
+    function revealOnScroll() {
+      const fadeIns = document.querySelectorAll('.fade-in');
+      const reveal = () => {
+        fadeIns.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight - 60) {
+            el.classList.add('visible');
+          }
+        });
+      };
+      reveal();
+      window.addEventListener('scroll', reveal);
+    }
+  </script>
+</body>
+</html>

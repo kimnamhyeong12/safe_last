@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>설정</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1b1c2e;
+      --accent: #3ddad7;
+      --background: #121212;
+      --text: #e0e0e0;
+      --card-bg: rgba(30, 30, 30, 0.35);
+      --shadow: rgba(0, 0, 0, 0.7);
+      --neon: #00ffff;
+    }
+
+    body {
+      background: var(--background);
+      color: var(--text);
+      font-family: 'Open Sans', sans-serif;
+      margin: 0;
+      padding-top: 100px;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 95%;
+      margin: 0 auto;
+      border-radius: 0 0 20px 20px;
+      background: linear-gradient(to bottom right, #1c1c1c, #2e3a59);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 12px var(--shadow);
+      z-index: 999;
+    }
+
+    .navbar a {
+      color: white;
+      margin-left: 25px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .navbar a:hover {
+      color: var(--accent);
+      text-shadow: 0 0 6px var(--neon);
+    }
+
+    .navbar .logo {
+      font-size: 1.3em;
+      font-weight: bold;
+      font-family: 'Playfair Display', serif;
+      color: #c0ffff;
+      text-shadow: 0 0 4px var(--neon);
+    }
+
+    h1.title {
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      margin: 40px 0 20px;
+    }
+
+    .setting-container {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      width: 80%;
+      margin: 0 auto 40px;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      box-shadow: 0 8px 20px var(--shadow);
+      overflow: hidden;
+    }
+
+    .tab-menu {
+      background-color: #11131d;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tab-menu button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 20px;
+      font-size: 16px;
+      text-align: left;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .tab-menu button:hover,
+    .tab-menu button.active {
+      background-color: var(--accent);
+      color: black;
+      font-weight: bold;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 40px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    input[type="text"], input[type="email"], input[type="number"], input[type="password"] {
+      width: 100%;
+      max-width: 400px;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #1e1e2f, #2a3c5b);
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    button {
+      background-color: var(--accent);
+      color: black;
+      font-weight: bold;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: box-shadow 0.3s ease;
+    }
+
+    button:hover {
+      box-shadow: 0 0 10px var(--neon);
+    }
+
+    .contact-grid {
+      display: flex;
+      gap: 30px;
+    }
+
+    .contact-form {
+      flex: 2;
+    }
+
+    .contact-list-panel {
+      flex: 1;
+      max-height: 330px;
+      overflow-y: auto;
+      background-color: #1f1f1f;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .contact-list-horizontal {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .contact-list-horizontal li {
+      background-color: #2a2a2a;
+      color: white;
+      padding: 8px;
+      margin-bottom: 8px;
+      border-radius: 5px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .contact-list-horizontal .delete-btn {
+      background-color: #ff4d4d;
+      border: none;
+      color: white;
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .contact-list-horizontal .delete-btn:hover {
+      background-color: #e60000;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="logo">SafeLast</div>
+    <div>
+      <a href="main.html">Home</a>
+      <a href="write.html">유언 작성</a>
+      <a href="directory.html">보관함</a>
+      <a href="setting.html">설정</a>
+      <a href="instruction.html">이용 방법</a>
+      <a href="#" onclick="logout()">로그아웃</a>
+    </div>
+  </div>
+
+  <h1 class="title">설정</h1>
+  <div class="setting-container">
+    <div class="tab-menu">
+      <button id="account-btn" onclick="showTab('account')">계정관리</button>
+      <button id="contact-btn" onclick="showTab('contact')">연락처 등록 및 관리</button>
+      <button id="alarm-btn" onclick="showTab('alarm')">알람 설정</button>
+    </div>
+
+    <div id="account" class="tab-content">
+      <h2>계정관리</h2>
+      <label>비밀번호 변경:</label><br>
+      <input type="password" id="current-password" placeholder="기존 비밀번호"><br>
+      <input type="password" id="new-password" placeholder="새 비밀번호"><br>
+      <button onclick="changePassword()">비밀번호 변경</button>
+    </div>
+
+    <div id="contact" class="tab-content">
+      <h2 style="margin-bottom: 20px;">연락처 등록 및 관리</h2>
+      <div class="contact-grid">
+        <div class="contact-form">
+          <label>이름 또는 관계</label><br>
+          <input type="text" id="contact-name" placeholder="예: 어머니, 친구"><br>
+          <label>이메일</label><br>
+          <input type="email" id="contact-email" placeholder="이메일 주소"><br>
+          <button onclick="addContact()">연락처 추가</button><br><br>
+          <p style="font-size: 14px;">※ 사후 유언을 전달할 대상자 이메일을 등록하세요.</p>
+        </div>
+        <div class="contact-list-panel">
+          <label>등록 목록</label><br>
+          <input type="text" id="contact-search" placeholder="검색..." oninput="filterContacts()" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+          <ul id="contact-list" class="contact-list-horizontal"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="alarm" class="tab-content">
+      <h2>알람 설정</h2>
+      <label>알람 주기 (일 단위):</label><br>
+      <input type="number" id="intervalDaysInput" min="1" value="1"><br>
+      <button id="saveButton" onclick="saveAlarmSetting()">저장</button><br>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('jwt');
+
+    function showTab(tabName) {
+      const contents = document.querySelectorAll('.tab-content');
+      const buttons = document.querySelectorAll('.tab-menu button');
+      contents.forEach(c => c.classList.remove('active'));
+      buttons.forEach(b => b.classList.remove('active'));
+      document.getElementById(tabName).classList.add('active');
+      document.getElementById(tabName + '-btn').classList.add('active');
+    }
+
+    async function changePassword() {
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('new-password').value;
+      if (!currentPassword || !newPassword) return alert("⚠️ 기존 비밀번호와 새 비밀번호를 모두 입력해주세요.");
+
+      const res = await fetch('/api/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        alert("✅ 비밀번호가 성공적으로 변경되었습니다. 다시 로그인해주세요.");
+        localStorage.clear();
+        window.location.href = "main.html";
+      } else alert(result.message || "❌ 비밀번호 변경 실패");
+    }
+
+    async function addContact() {
+      const name = document.getElementById('contact-name').value;
+      const email = document.getElementById('contact-email').value;
+      if (!name || !email) return alert('이름과 이메일 모두 입력해주세요');
+
+      const res = await fetch('/api/friends/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ name, email })
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        loadContacts();
+        document.getElementById('contact-name').value = '';
+        document.getElementById('contact-email').value = '';
+      } else alert(result.message || '저장 실패');
+    }
+
+    async function loadContacts() {
+      const res = await fetch('/api/friends', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const list = await res.json();
+      const ul = document.getElementById('contact-list');
+      ul.innerHTML = '';
+      list.forEach(friend => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${friend.name}: ${friend.email}</span><button class="delete-btn" onclick="deleteContact('${friend._id}')">삭제</button>`;
+        ul.appendChild(li);
+      });
+    }
+
+    async function deleteContact(id) {
+      const res = await fetch(`/api/friends/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) loadContacts();
+      else alert("삭제 실패");
+    }
+
+    function filterContacts() {
+      const keyword = document.getElementById('contact-search').value.toLowerCase();
+      const items = document.querySelectorAll('#contact-list li');
+      items.forEach(li => {
+        const text = li.innerText.toLowerCase();
+        li.style.display = text.includes(keyword) ? '' : 'none';
+      });
+    }
+
+    async function saveAlarmSetting() {
+      const intervalDays = document.getElementById('intervalDaysInput').value;
+      const res = await fetch('/api/alarm-setting', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ intervalDays })
+      });
+      const result = await res.json();
+      if (res.ok) alert('✅ 알람 주기가 저장되었습니다!');
+      else alert(result.message || '❌ 저장 실패');
+    }
+
+    async function loadAlarmSetting() {
+      const res = await fetch('/api/alarm-setting', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.intervalDays) {
+        document.getElementById('intervalDaysInput').value = data.intervalDays;
+      }
+    }
+
+    window.onload = () => {
+      showTab('account');
+      loadContacts();
+      loadAlarmSetting();
+    };
+
+    function logout() {
+      alert("로그아웃 되었습니다.");
+      localStorage.clear();
+      window.location.href = "main.html";
+    }
+  </script>
+</body>
+</html>

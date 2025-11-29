@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>유언 열람 | SafeLast</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1b1c2e;
+      --accent: #3ddad7;
+      --background: #121212;
+      --text: #e0e0e0;
+      --card-bg: rgba(30, 30, 30, 0.6);
+      --shadow: rgba(0, 0, 0, 0.6);
+      --neon: #00ffff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: linear-gradient(to bottom right, #101015, #1e2b3a, #121212);
+      color: var(--text);
+      min-height: 100vh;
+      padding-top: 100px;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(to bottom right, #1c1c1c, #2e3a59);
+      backdrop-filter: blur(6px);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 12px var(--shadow);
+      z-index: 999;
+    }
+
+    .navbar a {
+      color: white;
+      margin-left: 25px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .navbar a:hover {
+      color: var(--accent);
+      text-shadow: 0 0 6px var(--neon);
+    }
+
+    .logo {
+      font-size: 1.4em;
+      font-weight: bold;
+      font-family: 'Playfair Display', serif;
+      color: #c0ffff;
+      text-shadow: 0 0 5px var(--neon);
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background-color: var(--card-bg);
+      backdrop-filter: blur(10px);
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px var(--shadow);
+      text-align: center;
+    }
+
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2em;
+      margin-bottom: 30px;
+      color: #c0ffff;
+      
+    }
+
+    #message {
+  background: linear-gradient(145deg, rgba(28,28,28,0.85), rgba(60,80,110,0.65));
+  padding: 40px;
+  border-radius: 18px;
+  color: #f0f8ff;
+  font-size: 17px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  max-width: 840px;
+  margin: 80px auto;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  font-family: 'Playfair Display', serif;
+}
+
+
+    #status {
+      font-size: 1.1em;
+      text-align: center;
+      padding: 20px;
+      color: #bbb;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar" id="navbar"></div>
+
+  <div class="container">
+    <h2>🔐 고인의 유언</h2>
+    <div id="status">유언을 불러오는 중입니다...</div>
+    <div id="message" style="display:none;"></div>
+  </div>
+
+  <script>
+    const isLoggedIn = !!localStorage.getItem("jwt");
+    const navbar = document.getElementById("navbar");
+
+    if (isLoggedIn) {
+      navbar.innerHTML = `
+        <div class="logo">SafeLast</div>
+        <div>
+          <a href="main.html">Home</a>
+          <a href="write.html">유언 작성</a>
+          <a href="directory.html">보관함</a>
+          <a href="setting.html">설정</a>
+          <a href="instruction.html">이용 방법</a>
+          <a href="#" onclick="logout()">로그아웃</a>
+        </div>
+      `;
+    } else {
+      navbar.innerHTML = `
+        <div class="logo">SafeLast</div>
+        <div>
+          <a href="login.html">로그인</a>
+        </div>
+      `;
+    }
+
+    function logout() {
+      alert("로그아웃 되었습니다.");
+      localStorage.clear();
+      location.href = "main.html";
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const willId = params.get('id');
+    const token = localStorage.getItem('jwt');
+
+    if (!token) {
+      const redirectUrl = `/view.html?id=${encodeURIComponent(willId)}`;
+      window.location.href = `/login.html?redirect=${redirectUrl}`;
+    } else {
+      fetch(`/api/view/${willId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.message) {
+            document.getElementById('status').style.display = 'none';
+            const msgBox = document.getElementById('message');
+            msgBox.innerText = data.message;
+            msgBox.style.display = 'block';
+          } else {
+            document.getElementById('status').innerText = data.error || '유언을 불러올 수 없습니다.';
+          }
+        })
+        .catch(err => {
+          document.getElementById('status').innerText = '서버 통신 오류가 발생했습니다.';
+        });
+    }
+  </script>
+</body>
+</html>
