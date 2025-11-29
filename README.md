@@ -106,9 +106,6 @@ AES를 이용한 대칭키 암호화 (파일 암호화)
 
 🧠 위험 상태 판단 알고리즘(Scoring Logic)
 
-PPT의 STEP 01~04 기반
-
-
 while(true)-디지털유언장
 
 조건	점수	설명
@@ -117,8 +114,6 @@ while(true)-디지털유언장
 서버 ping 실패	+3	기기 오프라인/장애 가능성
 임계치 도달 시	⚠ 위험 상태	유언 자동 실행
 🛠 기술 스택
-
-PPT 05장 참고
 
 
 while(true)-디지털유언장
@@ -155,7 +150,6 @@ Email 발송 (Resend / Nodemailer)
 
 🧪 시나리오 예시
 
-PPT 06장 사례 기반
 
 
 while(true)-디지털유언장
@@ -178,7 +172,6 @@ while(true)-디지털유언장
 
 👥 팀 역할
 
-PPT 05장 기준
 
 
 while(true)-디지털유언장
